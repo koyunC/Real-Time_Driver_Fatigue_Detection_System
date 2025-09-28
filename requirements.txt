@@ -1,4 +1,11 @@
+# implementation
 opencv-python
 numpy
 mediapipe
 ipywidgets
+torch
+torchvision
+pillow
+
+# training (scikit-learn only for model evaluation)
+scikit-learn
