@@ -1,11 +1,13 @@
 # implementation
-opencv-python
-numpy
+torch==1.8.0
+torchvision==0.9.0
 mediapipe
+opencv-python-headless
+numpy<2
 ipywidgets
-torch
-torchvision
 pillow
+flask
 
 # training (scikit-learn only for model evaluation)
 scikit-learn
+
