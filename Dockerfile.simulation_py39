@@ -8,6 +8,7 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+wget \
     build-essential \
     libgl1-mesa-glx \
     libglib2.0-0 \
@@ -18,8 +19,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY src /app/src
 COPY main.py /app/main.py
 COPY web_main.py /app/web_main.py
-COPY models /app/models
 COPY requirements.txt /app/requirements.txt
+COPY download_models.sh /app/download_models.sh
+
+# Download models from Hugging Face
+RUN ./download_models.sh
 
 # Install python dependencies
 RUN pip install --upgrade pip
