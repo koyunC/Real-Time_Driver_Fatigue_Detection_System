@@ -1,52 +1,41 @@
 # Real-Time_Driver_Fatigue_Detection_System
-This repository contains a real-time driver fatigue detection system implemented in **Python/PyTorch** and optimized for the **Jetson Nano**. The project includes both model training and system implementation.
 
-In the training part, we compare the performance of **ResNet-18** and **ResNet-34** on a subset(N=10k) of the [MRL Eye dataset](https://mrl.cs.vsb.cz/eyedataset.html).
+This repository implements a high-performance driver fatigue detection system optimized for the **NVIDIA Jetson Nano**. It combines real-time facial landmark tracking with deep learning classification to ensure road safety.
 
-For the system implementation part, we use a pipeline that consists of face detection, eyes regions extraction, image pre-processing, and eyes state classification. The system is optimized to run in real-time on the Jetson Nano.
+## Technical highlights
 
-## Demo Video
+- **Multi-threaded Pipeline**: Decouples camera stream capture from inference loop using [camera.py](src/camera.py), preventing frame-dropping and blocking during model inference.
 
-[**Youtube link**](https://youtu.be/qRJu7e0x36s)
+- **Hybrid Detection**: Utilizes **MediaPipe** to track facial landmarks and dynamically extract high-precision ROI for the eyes in varying lighting environments.
 
-**Note**: The demo video is recorded on a machine with an *Intel Core i7-10710U CPU* and *NVIDIA GeForce GTX 1650 with Max-Q Design*. The performance on the Jetson Nano can only achieve 2-3 FPS.
+- **Edge-optimized Inference**: After comparing **ResNet-18** and **ResNet-34**, we chose **ResNet-18** for the system implementation to achieve a balance of 99% accuracy and low latency.
 
-## Model Training
+## Project Structure
+Modular code is stored in the [`src`](src) directory.
 
-The training code is located in the [`model_training`](model_training) directory. It includes scripts for dataset preparation, data preprocessing, model training, and evaluation.
+```
+src/
+├── __init__.py         
+├── camera.py           # Camera handling & threading
+├── config.py           # Global configurations
+├── detection.py        # Face & eye ROI detection
+├── inference.py        # Integrated inference pipeline class
+├── model.py            # Model architecture definition
+└── preprocessing.py    # Image pre-processing utilities
+```
 
-### Dataset Preparation
 
-- [`gen_subset.py`](model_training/gen_subset.py): Generate a balanced subset of the MRL Eye dataset with given subset size. In this project, the subset size is set to 10k.
+## Model Training & Evaluation
 
-### Training and Evaluation
+- Dataset: Balanced subset (10k images) of the [MRL Eye dataset](https://mrl.cs.vsb.cz/eyedataset.html)
 
-The training and evaluation scripts are located in the jupyter notebooks: [`resNet18_training.ipynb`](model_training/resNet18_training.ipynb) and [`resNet34_training.ipynb`](model_training/resNet34_training.ipynb). The training process was done on a machine with a *NVIDIA GeForce GTX 1650 with Max-Q Design*.
+- Comparison: Similar accuracy around 99%, but lower latency on **ResNet-18**.
 
-Both training use the following hyperparameters:
+- Legacy research: Initial experiment and training logs are preserved in [notebooks](notebooks) directory.
 
-- Optimizer: SGD (lr=0.001, momentum=0.9)
-- Loss Function: CrossEntropyLoss
-- Batch Size: 64
-- Number of Epochs: 20
+## Quick Start
 
-They both achieve over 99% accuracy on the validation set, considering the limited performance we can get from Jetson Nano, we chose ResNet-18 for the system implementation.
+### Note: The current Docker environment is designed for refactor validation and core logic testing.
 
-## System Implementation
+Run `./run_web.sh` to start the system with a web interface. (or `./run_simulation.sh` for CLI only mode)
 
-The system implementation code is located in the [`implementation/CompactVersion.ipynb`](implementation/CompactVersion.ipynb).
-
-### Pipeline
-
-The pipeline consists of four main components:
-
-1. **Image pre-processing**: Capturing video frames from the webcam and applying normalization, CLAHE, and gamma adjustment.
-2. **Face Detection**: Using MediaPipe's Face Detection module to detect eyes areas and calculate the center coordinates of the eyes.
-3. **Eye Region Extraction**: Extracting the eye regions in a 70px*70px square based on the calculated coordinates.
-4. **Eye State Classification**: Using the trained ResNet-18 model to classify the eye state as open or closed.
-5. **Drowsiness Alert**: Triggering an alert if the eyes are detected as closed for continuously 3 frames in a 5 frame window.
-
-## Other files and directories
-
-- [`model`](model): Contains the trained ResNet-18, ResNet-34, and mediapipe model weights.
-- [`requirements.txt`](requirements.txt): Lists the required Python packages and their versions.
